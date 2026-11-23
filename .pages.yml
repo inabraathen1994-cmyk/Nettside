@@ -1,0 +1,70 @@
+# Oppsett for Pages CMS (app.pagescms.org) – gjør at du kan redigere siden i nettleseren.
+media:
+  input: media
+  output: /media
+  rename: safe
+content:
+  - name: nettside
+    label: Nettside
+    type: file
+    path: content/site.json
+    format: json
+    fields:
+      - name: works
+        label: Arbeider (øverst = først på siden)
+        type: object
+        list: true
+        fields:
+          - name: title
+            label: Tittel
+            type: string
+          - name: category
+            label: Kategori
+            type: string
+          - name: year
+            label: År
+            type: string
+          - name: desc
+            label: Beskrivelse
+            type: text
+          - name: link
+            label: Lenke til prosjektet (valgfritt)
+            type: string
+          - name: media
+            label: Bilder, video eller PDF (første bilde blir forsidebilde)
+            type: file
+            options:
+              multiple:
+                max: 20
+      - name: links
+        label: Lenker
+        type: object
+        fields:
+          - name: linkedin
+            label: LinkedIn
+            type: string
+          - name: behance
+            label: Behance
+            type: string
+      - name: intro
+        label: Om meg
+        type: text
+      - name: photo
+        label: Portrett (tomt = standardbildet). PNG med gjennomsiktig bakgrunn blir finest
+        type: image
+      - name: theme
+        label: Farger (skriv fargekode som #ffffff, tomt felt = standardfarge)
+        type: object
+        fields:
+          - name: bg
+            label: Bakgrunn
+            type: string
+          - name: text
+            label: Tekst
+            type: string
+          - name: accent
+            label: Blokker (standard rosa #f3c9da)
+            type: string
+          - name: marker
+            label: Merkelapper (standard gul #f2f13d)
+            type: string
