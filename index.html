@@ -192,7 +192,7 @@ dialog.lb::backdrop{background:rgba(15,13,14,.72)}
 .mo .bar::after{content:"";position:absolute;left:0;bottom:-1px;height:2px;width:100%;background:var(--pink-deep);transform-origin:0 50%;transform:scaleX(var(--p,0))}
 
 /* hero name: lines slide up out of a mask */
-.name .ln{display:block;overflow:hidden;padding-top:.05em;margin-top:-.05em;padding-bottom:.2em;margin-bottom:-.2em}
+.name .ln{display:block;overflow:hidden;padding-top:.05em;margin-top:-.05em}
 .name .ln-i{display:block}
 .mo .name.rv .ln-i{transform:translateY(105%);transition:transform 1s cubic-bezier(.2,.8,.1,1) var(--d,0ms)}
 .mo .name.rv.in .ln-i{transform:none}
@@ -230,6 +230,10 @@ dialog.lb::backdrop{background:rgba(15,13,14,.72)}
 
 /* portrait follows the mouse a little */
 .portrait img{transition:transform .5s cubic-bezier(.2,.8,.2,1);transform:translate(calc(var(--mx,0)*26px),calc(var(--my,0)*18px)) rotate(calc(var(--mx,0)*9deg))}
+
+/* every "_" sits on the same line as the text (the glyph normally hangs below the baseline) */
+.us,.cur,.mark span,.mq-track i{position:relative;top:-.126em}
+.nav .us{top:-.11em}
 
 /* touch screens have no mouse: the head wobbles a little on its own */
 @media (hover:none){.mo .portrait img{animation:wobble 2.6s ease-in-out infinite}}
@@ -456,6 +460,21 @@ function copyMail(ev){
 }
 function selectMail(){ var c = document.getElementById("mail-text"); if (!c) return; var r = document.createRange(); r.selectNodeContents(c); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
 
+/* Wrap every "_" in a span so CSS can lift it up onto the baseline of the text next to it. */
+function liftUnderscores(root){
+  var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), nodes = [], n;
+  while ((n = w.nextNode())) if (n.nodeValue.indexOf("_") >= 0 && !(n.parentNode.closest && n.parentNode.closest(".us, .cur, .mark span"))) nodes.push(n);
+  nodes.forEach(function(t){
+    var frag = document.createDocumentFragment();
+    t.nodeValue.split(/(_)/).forEach(function(part){
+      if (!part) return;
+      if (part === "_"){ var s = document.createElement("span"); s.className = "us"; s.textContent = "_"; frag.append(s); }
+      else frag.append(part);
+    });
+    t.parentNode.replaceChild(frag, t);
+  });
+}
+
 function render(){
   var y = window.scrollY;
   applyTheme(S.theme);
@@ -464,10 +483,11 @@ function render(){
     h("header", {class:"bar"}, h("div", {class:"wrap"},
       h("a", {class:"mark", href:"#top"}, "IHB", h("span", null, "_")),
       h("nav", {class:"nav", "aria-label":"Seksjoner"},
-        h("a", {href:"#arbeider"}, "_ Arbeider"), h("a", {href:"#om"}, "_ Om"), h("a", {href:"#cv"}, "_ CV"), h("a", {href:"#kontakt"}, "_ Kontakt")),
+        h("a", {href:"#arbeider"}, "_ Portfolio"), h("a", {href:"#om"}, "_ Om"), h("a", {href:"#cv"}, "_ CV"), h("a", {href:"#kontakt"}, "_ Kontakt")),
       h("div", {class:"chips"}, socialChips()))),
     h("main", {id:"top"}, hero(), worksSection(), aboutSection(), cvSection(), contactSection()),
     h("footer", {class:"foot"}, h("div", {class:"wrap"}, h("span", null, "© " + new Date().getFullYear() + " " + C.name), h("span", null, C.cv.location))));
+  liftUnderscores(app);
   window.scrollTo(0, y);
 }
 
@@ -480,7 +500,7 @@ function hero(){
       h("div", {class:"chips"},
         h("span", {class:"chip"}, h("b", null, "L:"), C.cv.location),
         h("a", {class:"chip", href:"#kontakt"}, h("b", null, "M:"), C.email),
-        h("a", {class:"chip", href:"#arbeider"}, h("b", null, "→"), "Se arbeider")))));
+        h("a", {class:"chip", href:"#arbeider"}, h("b", null, "→"), "Se portfolio")))));
 }
 
 function worksSection(){
@@ -501,7 +521,7 @@ function worksSection(){
     grid.append(card(w, size));
   });
   return h("section", {class:"sec", id:"arbeider"}, h("div", {class:"wrap"},
-    h("div", {class:"sec-head"}, h("h2", {class:"h"}, "_ Arbeider")),
+    h("div", {class:"sec-head"}, h("h2", {class:"h"}, "_ Portfolio")),
     cats.length > 1 ? h("div", {class:"filters", role:"group", "aria-label":"Filtrer etter kategori"},
       ["Alle"].concat(cats).map(function(c){ return h("button", {"aria-pressed": String(filter === c), onclick:function(){ filter = c; render(); }}, c); })) : null,
     grid));
